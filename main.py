@@ -1,43 +1,51 @@
-import telebot 
-import requests
- 
- 
-token='6365100027:AAESUZPeAmVhDtcAPwSGJPl7IS8LINciRIs' 
- 
-bot=telebot.TeleBot(token) 
- 
-def reqapi(ip): 
-    url=f'https://ipinfo.io/{ip}/geo' 
-    r=requests.get(url).json() 
-    return(r) 
- 
-def generator_keyboards(ListNameBTN, NumbersColumns=2):
-    keyboards=telebot.types.ReplyKeyboardMarkup(row_width=NumbersColumns, resize_keyboard=True)
-    btn_names=[telebot.types.KeyboardButton(text=x) for x in ListNameBTN]
-    keyboards.add(*btn_names)
-    return keyboards       
+import telebot
+import random
+from telebot import types
 
+bot=telebot.TeleBot('')
 
+keyboard=types.InlineKeyboardMarkup()
 
-@bot.message_handler(commands=['start']) 
+@bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id,f'Привет', reply_markup=generator_keyboards(['Информация об ip']))
- 
-@bot.message_handler(func=lambda x :x.text)
-def text(message):
-    text=message.text
-    if text=='Информация об ip':
-        def getip(message): 
-            ip = message.text 
-            res=reqapi(ip)
-            print(res)
-            msg=f' По вашему ip - {res["ip"]}\
-            \n Город - {res["city"]}\
-            \n Регион - {res["region"]}\
-            \n Страна - {res["country"]}\
-            \n Координаты - {res["loc"]}\
-            \n Часовой пояс - {res["timezone"]}'
-            bot.send_message(message.chat.id,msg) 
+    btn1=keyboard.add(types.InlineKeyboardButton('6',callback_data='line1'))
+    btn2=keyboard.add(types.InlineKeyboardButton('8',callback_data='line2'))
+    btn3=keyboard.add(types.InlineKeyboardButton('10',callback_data='line3'))
+    bot.send_message(message.chat.id,f'Какая будет длина Вашего пароля?',reply_markup=keyboard)
+
+def gen_password(message):
+    
+    digits="0123456789"
+    lowercase_letters='abcdefghijklmnopqrstuvwxyz'
+    uppcase_letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    punctuacion="~!@$^&*_-`"
+    keyboard.add(types.InlineKeyboardButton('Да',callback_data='yes'))
+    keyboard.add(types.InlineKeyboardButton('Нет',callback_data='no'))
+    di=bot.send_message(message.chat.id,f'Какая будет длина Вашего пароля?',reply_markup=keyboard)
+    if di=='yes':
+        chars+=digits
+    low=input('Добавить буквы нижнего регистра?\n1-да\n2-нет\n')
+    if low=='1':
+        chars+=lowercase_letters
+    upp=input('Добавить буквы верхнего регистра?\n1-да\n2-нет\n')
+    if upp=='1':
+        chars+=uppcase_letters
+    sp=input('Добавить специальные символы?\n1-да\n2-нет\n')
+    if sp=='1':
+        chars+=punctuacion
+    print('ваш пароль готов: ',gen_password(line,chars))
+    print('Спасибо, что использовали наш генератор паролей!')
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handler(call):
+    if call.data=='line1':
+        line=6
+    elif call.data=='line2':
+        line=8
+    elif call.data=='line3':
+        line=10
+
+        
 
 
         
